@@ -86,6 +86,7 @@ const HouseList = () => {
 ```
 * setHouses should always be used to change houses
 * Always call useState hook at the start of the component function.
+* Never call `useState` conditionally
 * Always provide _new_ array in `setHouses`
 * Components can change their state, but not props they receive. (no double data binding)
     * Only 1 way data binding
@@ -103,6 +104,16 @@ const addHouse = () => {
     ]);
   };
 ```
+
+An example of an onChange-handler using setSize state function:
+
+````jsx
+      <select
+              id="size"
+              value={size}
+              onChange={(e) => setSize(e.target.value)}
+            >
+````
 
 For state updates in child components pass `setSelectedHouse` function to a child using a wrapper function:
 
@@ -134,6 +145,7 @@ const App = () => {
 ### useEffect hook for fetching data initially and adding or removing event listeners
 
 Provide empty deps array as 2nd parameter to only fetch initially and not on every change.
+
 ```js
 
 // Component function and useEffect are run initially AND on every state change
@@ -217,6 +229,57 @@ useEffect(() => {
   fetchHouses();
 }, [get]); // dependent on get
 ```
+
+A different loading hook example:
+
+````jsx
+import { useState, useEffect } from "react";
+
+const baseUrl = process.env.REACT_APP_API_BASE_URL; // env variable for base path
+
+export default function useFetch(url) { // Can be called to make REST calls with different urls
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+      
+    async function init() { // must declare async functions inside useEffecte
+      try {
+        const response = await fetch(baseUrl + url);
+        if (response.ok) {
+          const json = await response.json();
+          setData(json);
+        } else {
+          throw response;
+        }
+      } catch (e) {
+        setError(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    init();
+    
+  }, [url]); // will be run once for every different url
+
+  return { data, error, loading };
+}
+
+````
+
+Consuming the `useFetch` hook:
+
+````jsx
+
+export default function App() {
+  const [size, setSize] = useState("");
+
+  const { data: products, loading, error } = useFetch(
+          "products?category=shoes"
+  );
+````
 
 ## Conditional rendering
 
@@ -510,16 +573,26 @@ class ErrorBoundary extends React.Component {
 export default ErrorBoundary;
 ````
 
-Now could wrap any component (in an Inner component) with ErrorBoundary.
+Now could wrap any component like App with ErrorBoundary e.g. in `index.js`:
 
 ````jsx
-const ToDo = (props) => {
-return (
-  <ErrorBoundary>
-    <Inner {...props} />
-  </ErrorBoundary>
-  );
-};
+
+ReactDOM.render(
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>,
+        document.getElementById("root")
+);
+````
+
+Limitations:
+* cannot catch errors in async code, event handlers, inside error boundary or in SSR components.
+
+To handle async errors must add a catch and set an error state variable:
+If error state variable is set, then throw error instead returning jsx:
+
+````jsx
+  if (error) throw error;
 ````
 
 ## Rendering performance optimization
