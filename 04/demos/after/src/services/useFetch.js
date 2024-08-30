@@ -8,6 +8,7 @@ export default function useFetch(url) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     async function init() {
       try {
         const response = await fetch(baseUrl + url);
@@ -23,6 +24,7 @@ export default function useFetch(url) {
         setLoading(false);
       }
     }
+
     init();
   }, [url]);
 

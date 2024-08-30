@@ -807,3 +807,75 @@ export default function ToDoItemClient({ toDo, children }) {
 
 The function can access the client context state as well as the children passed in from the ToDoList server component. 
 
+# React Router
+
+Separate open source project. Not part of React. To use it can wrap `App` component in `BrowserRouter`:
+
+```jsx
+import { BrowserRouter } from "react-router-dom";
+
+ReactDOM.render(
+  <ErrorBoundary>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </ErrorBoundary>,
+  document.getElementById("root")
+);
+```
+
+Then in `App.jsx` declare the routes:
+
+```jsx
+import { Routes, Route } from "react-router-dom";
+
+export default function App() {
+  return (
+          <>
+            <div className="content">
+              <Header />
+              <main>
+                <Routes>
+                  <Route path="/" element={<h1>Welcome to Carved Rock Fitness</h1>} />
+                  <Route path="/:category" element={<Products />} />
+                  <Route path="/:category/:id" element={<Detail />} />
+                  <Route path="/cart" element={<Cart />} />
+                </Routes>
+              </main>
+            </div>
+            <Footer />
+          </>
+  );
+}
+```
+
+
+Read the path parameter `:category` in `Products.jsx` using `useParams` hook:
+
+```jsx
+ export default function Products() {
+    const {category} = useParams();
+    
+}
+```
+
+## Handling 404s
+
+Just a simple component:
+
+````jsx
+import React from "react";
+
+export default function PageNotFound() {
+  return <h1>Page not found.</h1>;
+}
+````
+
+So if API call has no results, can simply return it in an early return from `Products` component function:
+
+````jsx
+  if (products?.length === 0) return <PageNotFound />;
+````
+
+TODO: how to redirect?
+
