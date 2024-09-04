@@ -65,6 +65,18 @@ Need to provide a key prop for tracking:
 ))}
 ```
 
+Another example with an html-select:
+````jsx
+<select id="size" value={sku} onChange={(e) => setSku(e.target.value)}>
+        <option value="">What size?</option>
+        {product.skus.map((s) => (
+                <option key={s.sku} value={s.sku}>
+                  {s.size}
+                </option>
+        ))}
+</select>
+````
+
 ## Hooks and State
 * In general React lifecyle hooks or custom hooks
 
@@ -305,6 +317,18 @@ return (
         </tr>
 );
 ```
+
+## Disabling Controls
+
+Based on the state of `sku` disable a button:
+
+````jsx
+const [sku, setSku] = useState("");
+...
+ <button 
+         disabled={!sku}
+...
+````
 
 ## React.Context
 
@@ -849,7 +873,6 @@ export default function App() {
 }
 ```
 
-
 Read the path parameter `:category` in `Products.jsx` using `useParams` hook:
 
 ```jsx
@@ -858,6 +881,55 @@ Read the path parameter `:category` in `Products.jsx` using `useParams` hook:
     
 }
 ```
+
+Navigate to another page with Link or NavLink:
+
+````jsx
+import { Link, NavLink } from "react-router-dom";
+
+const activeStyle = {
+  color: "purple",
+};
+
+export default function Header() {
+    return (
+        <header>
+            <nav>
+                <ul>
+                    <li>
+                        <Link to="/">
+                            <img alt="Carved Rock Fitness" src="/images/logo.png"/>
+                        </Link>
+                    </li>
+                    <li>
+                        <NavLink activeStyle={activeStyle} to="/shoes">
+                            Shoes
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink activeStyle={activeStyle} to="/cart">
+                            Cart
+                        </NavLink>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+    );
+}
+````
+
+NavLink accepts an active style.
+
+Programmatically redirect with `useNavigate`:
+
+````jsx
+    ...
+    const navigate = useNavigate();
+    ...
+    <button className="btn btn-primary" onClick={() => navigate("/cart")}>
+      Add to cart
+    </button>
+````
 
 ## Handling 404s
 
@@ -877,5 +949,16 @@ So if API call has no results, can simply return it in an early return from `Pro
   if (products?.length === 0) return <PageNotFound />;
 ````
 
-TODO: how to redirect?
+# State Management Guidelines
+
+* Keep state local in component
+* But if multiple components need the same state, then lift state to common parent component
+  * provide child components with wrapper function around state setter
+* Always use the function form to increment state 
+  ```jsx 
+   setCount((count) => count + 1);
+  ```
+* Treat state objects as immutable, meaning always create a new object if it's props change
+  * TODO: How to implement?
+
 
