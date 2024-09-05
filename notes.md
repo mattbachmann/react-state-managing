@@ -959,6 +959,30 @@ So if API call has no results, can simply return it in an early return from `Pro
    setCount((count) => count + 1);
   ```
 * Treat state objects as immutable, meaning always create a new object if it's props change
-  * TODO: How to implement?
+  * `const newState = Object.assign({}, oldState, { updatedProp: 'newValue' });`
+  * `const newState = {...oldState, updatedProp: 'newValue'};`
+  * `const newArr = [...oldArr, newEntry];`
+  * Both only clone shallow - not nested objects
+    * Best keep Objects apart instead of nesting, try to avoid deep cloning
+  * Also use array transformer functions like `map, filter, reduce`
 
+Example with addToCart:
 
+````jsx
+const [cart, setCart] = useState([]);
+
+function addToCart(id) {
+  setCart((items) => {
+    const itemInCart = items.find((i) => i.id === id);
+    if (itemInCart) {
+      // Return new array with the matching item's quantity increased
+      return items.map((item) =>
+              item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      );
+    } else {
+      // Return new array with the new item appended
+      return [...items, { id, quantity: 1 }];
+    }
+  });
+}
+````
