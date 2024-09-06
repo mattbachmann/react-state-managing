@@ -964,7 +964,7 @@ So if API call has no results, can simply return it in an early return from `Pro
   * `const newArr = [...oldArr, newEntry];`
   * Both only clone shallow - not nested objects
     * Best keep Objects apart instead of nesting, try to avoid deep cloning
-  * Also use array transformer functions like `map, filter, reduce`
+  * Also use array transformer functions like `map, filter`
 
 Example with addToCart:
 
@@ -985,4 +985,32 @@ function addToCart(id) {
     }
   });
 }
+````
+
+# Web Storage
+
+Only for:
+* limited data
+* not security relevant
+* limited amounts of writes (to not block browser)
+* Works only on one device
+
+On `localStorage` can call `setItem, getItem and removeItem`.
+
+Example with useEffect:
+
+````jsx
+export default function App() {
+  // The function is evaluated lazily and will only run on initial render  
+  const [cart, setCart] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("cart")) ?? [];
+    } catch {
+      console.error("The cart could not be parsed into JSON.");
+      return [];
+    }
+  });
+
+  // Everytime the cart dep changes, then store it in localStorage
+  useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
 ````
