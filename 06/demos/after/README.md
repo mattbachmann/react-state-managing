@@ -1,11 +1,27 @@
 ## Quick Start
 
-Run the following commands:
+### Get the required Nodejs Version, install and start app
+
+Install `nvm` and then exec `nvm install 10` and `nvm use 10`.
+
+Then run the following commands:
 
 ```
+node -v
 npm install
 npm start
 ```
+
+### Fix SSL-error for http://localhost:3000
+
+In chrome type: `chrome://net-internals/#hsts`
+
+Click on `Domain Security Policy` on the Sidebar. 
+
+Under "Delete domain security policies" enter domain `localhost` and hit "Delete".
+
+Now can open http://localhost:3000 to test app.:-)
+
 
 This will install dependencies, then start the app and mock API.
 
