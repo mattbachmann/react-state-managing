@@ -26,7 +26,7 @@ export default function Checkout({ cart, emptyCart }) {
   const isValid = Object.keys(errors).length === 0;
 
   function handleChange(e) {
-    e.persist(); // persist the event
+    e.persist(); // persist the event, otherwise would be garbage collected (React 17+ not required)
     setAddress((curAddress) => {
       return {
         ...curAddress,

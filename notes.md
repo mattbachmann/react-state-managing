@@ -1014,3 +1014,101 @@ export default function App() {
   // Everytime the cart dep changes, then store it in localStorage
   useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
 ````
+
+# Running example projects
+
+Some projects written with an older React version like 16 require an older NodeJS version like 10.
+
+### Get older Nodejs Version, install and start app
+
+Install `nvm` and then exec `nvm install 10` and `nvm use 10`.
+
+Then run the following commands:
+
+```
+node -v
+npm install
+npm start
+```
+
+### Fix SSL-error for http://localhost:3000
+
+In chrome type: `chrome://net-internals/#hsts`
+
+Click on `Domain Security Policy` on the Sidebar.
+
+Under "Delete domain security policies" enter domain `localhost` and hit "Delete".
+
+Now can open http://localhost:3000 to test app.:-)
+
+# Managing Form State and Validation
+
+Manage form status with a pseudo-enum STATUS and a single state variable status. SUBMITTED comes after user hits "submit".
+Then validation will show errors below the inputs. 
+The purpose of SUBMITTING is to disable the "submit" button during validation and save.
+
+```jsx
+const STATUS = {
+  IDLE: "IDLE",
+  SUBMITTED: "SUBMITTED",
+  SUBMITTING: "SUBMITTING",
+  COMPLETED: "COMPLETED",
+};
+
+// Declaring outside component to avoid recreation on each render
+const emptyAddress = {
+  city: "",
+  country: "",
+};
+
+export default function Checkout({ cart, emptyCart }) {
+  const [address, setAddress] = useState(emptyAddress);
+  const [status, setStatus] = useState(STATUS.IDLE);
+  const [saveError, setSaveError] = useState(null);
+  const [touched, setTouched] = useState({});
+
+// Validation - executed after every change:
+const errors = getErrors(address);
+const isValid = Object.keys(errors).length === 0;
+
+function getErrors(address) {
+    const result = {};
+    if (!address.city) result.city = "City is required";
+    if (!address.country) result.country = "Country is required";
+    return result;
+  }
+
+async function handleSubmit(event) {
+  event.preventDefault();
+  setStatus(STATUS.SUBMITTING);
+  if (isValid) {
+    try {
+      await saveShippingAddress(address);
+      emptyCart();
+      setStatus(STATUS.COMPLETED);
+    } catch (e) {
+      setSaveError(e);
+    }
+  } else {
+    setStatus(STATUS.SUBMITTED);
+  }
+}
+
+````
+
+Show error in returned markup:
+
+````jsx
+ <input
+        id="city"
+        type="text"
+        value={address.city}
+        onBlur={handleBlur}
+        onChange={handleChange}
+/>
+<p role="alert">
+  {(touched.city || status === STATUS.SUBMITTED) && errors.city}
+</p>
+````
+
+
