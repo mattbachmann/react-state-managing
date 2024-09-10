@@ -30,15 +30,15 @@ export default function Checkout({ cart, emptyCart }) {
     setAddress((curAddress) => {
       return {
         ...curAddress,
-        [e.target.id]: e.target.value,
+        [e.target.id]: e.target.value, // then can use event.target.id as key
       };
     });
   }
 
   function handleBlur(event) {
-    event.persist();
+    event.persist(); // persist the event, otherwise would be garbage collected (React 17+ not required)
     setTouched((cur) => {
-      return { ...cur, [event.target.id]: true };
+      return { ...cur, [event.target.id]: true }; // then can use event.target.id as key
     });
   }
 

@@ -193,6 +193,10 @@ return (
 );
 ```
 
+Refs are useful for:
+* element reference
+* to preserve unrendered state between renders like previous value
+
 ### Custom hook for api calls and loadingState
 
 In general custom hooks start with `use` and are defined in their own file like here `useGetRequest.js`.
@@ -1039,7 +1043,7 @@ Click on `Domain Security Policy` on the Sidebar.
 
 Under "Delete domain security policies" enter domain `localhost` and hit "Delete".
 
-Now can open http://localhost:3000 to test app.:-)
+Now can open http://localhost:3000 in a new tab to test app.:-)
 
 # Managing Form State and Validation
 
@@ -1062,38 +1066,45 @@ const emptyAddress = {
 };
 
 export default function Checkout({ cart, emptyCart }) {
-  const [address, setAddress] = useState(emptyAddress);
-  const [status, setStatus] = useState(STATUS.IDLE);
-  const [saveError, setSaveError] = useState(null);
-  const [touched, setTouched] = useState({});
+    const [address, setAddress] = useState(emptyAddress);
+    const [status, setStatus] = useState(STATUS.IDLE);
+    const [saveError, setSaveError] = useState(null);
+    const [touched, setTouched] = useState({});
 
-// Validation - executed after every change:
-const errors = getErrors(address);
-const isValid = Object.keys(errors).length === 0;
+    // Validation - executed after every change:
+    const errors = getErrors(address);
+    const isValid = Object.keys(errors).length === 0;
 
-function getErrors(address) {
-    const result = {};
-    if (!address.city) result.city = "City is required";
-    if (!address.country) result.country = "Country is required";
-    return result;
-  }
-
-async function handleSubmit(event) {
-  event.preventDefault();
-  setStatus(STATUS.SUBMITTING);
-  if (isValid) {
-    try {
-      await saveShippingAddress(address);
-      emptyCart();
-      setStatus(STATUS.COMPLETED);
-    } catch (e) {
-      setSaveError(e);
+    function getErrors(address) {
+        const result = {};
+        if (!address.city) result.city = "City is required";
+        if (!address.country) result.country = "Country is required";
+        return result;
     }
-  } else {
-    setStatus(STATUS.SUBMITTED);
-  }
-}
 
+    function handleBlur(event) {
+        event.persist(); // persist the event, otherwise would be garbage collected (React 17+ not required)
+        setTouched((cur) => {
+            return {...cur, [event.target.id]: true}; // then can use event.target.id as key
+        });
+    }
+
+    async function handleSubmit(event) {
+        event.preventDefault();
+        setStatus(STATUS.SUBMITTING);
+        if (isValid) {
+            try {
+                await saveShippingAddress(address);
+                emptyCart();
+                setStatus(STATUS.COMPLETED);
+            } catch (e) {
+                setSaveError(e);
+            }
+        } else {
+            setStatus(STATUS.SUBMITTED);
+        }
+    }
+}
 ````
 
 Show error in returned markup:
@@ -1110,5 +1121,7 @@ Show error in returned markup:
   {(touched.city || status === STATUS.SUBMITTED) && errors.city}
 </p>
 ````
+
+
 
 
