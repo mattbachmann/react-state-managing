@@ -1,3 +1,45 @@
+<!-- TOC -->
+* [Introduction to React](#introduction-to-react)
+  * [JSX vs html](#jsx-vs-html)
+  * [Tooling](#tooling)
+  * [Styling in NextJS](#styling-in-nextjs)
+  * [Props](#props)
+    * [Setting props with spread operator](#setting-props-with-spread-operator)
+    * [Props inside map function](#props-inside-map-function)
+  * [Hooks and State](#hooks-and-state)
+    * [useState Hook for change detection](#usestate-hook-for-change-detection)
+    * [useEffect hook for fetching data initially and adding or removing event listeners](#useeffect-hook-for-fetching-data-initially-and-adding-or-removing-event-listeners)
+    * [useRef hook as element reference](#useref-hook-as-element-reference)
+    * [Custom hook for api calls and loadingState](#custom-hook-for-api-calls-and-loadingstate)
+  * [Conditional rendering](#conditional-rendering)
+  * [Disabling Controls](#disabling-controls)
+  * [React.Context](#reactcontext)
+  * [Forms](#forms)
+* [Working with Components React 18](#working-with-components-react-18)
+  * [Next.js Toolchain](#nextjs-toolchain)
+  * [Higher Order Components (HOCs)](#higher-order-components-hocs)
+  * [React Developer Tools](#react-developer-tools)
+    * [Components tab](#components-tab)
+    * [Profiler tab](#profiler-tab)
+      * [Profile page load](#profile-page-load)
+      * [Profile a single action](#profile-a-single-action)
+    * [Error boundaries](#error-boundaries)
+  * [Rendering performance optimization](#rendering-performance-optimization)
+    * [React.memo](#reactmemo)
+    * [Debouncing / useDeferredValue](#debouncing--usedeferredvalue)
+    * [Prioritizing updates / useTransition](#prioritizing-updates--usetransition)
+  * [Server components / SSR](#server-components--ssr)
+* [Class Components](#class-components)
+* [React Router](#react-router)
+  * [Handling 404s](#handling-404s)
+* [Running example projects](#running-example-projects)
+    * [Get older Nodejs Version, install and start app](#get-older-nodejs-version-install-and-start-app)
+    * [Fix SSL-error for http://localhost:3000](#fix-ssl-error-for-httplocalhost3000)
+* [Managing Form State and Validation](#managing-form-state-and-validation)
+  * [State Management Guidelines](#state-management-guidelines)
+  * [Web Storage](#web-storage)
+<!-- TOC -->
+
 # Introduction to React
 
 ## JSX vs html
@@ -845,6 +887,56 @@ export default function ToDoItemClient({ toDo, children }) {
 
 The function can access the client context state as well as the children passed in from the ToDoList server component. 
 
+# Class Components
+
+Though functional components are recommended since React 16, class components still work!
+
+Similar to Angular the class component has lifecycle hooks:
+
+* componentDidMount (on init)
+* componentDidUpdate (on change)
+* componentWillUnmount (on destroy)
+* shouldComponentUpdate
+
+Simple example:
+
+````jsx
+class MyComponent extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      data: null,
+    };
+  }
+
+  componentDidMount() {
+    // This is where you can perform initial setup.
+
+    // In this example, we simulate fetching data from an API after the             component has mounted.
+    // We use a setTimeout to mimic an asynchronous operation.
+    setTimeout(() => {
+      const fetchedData = 'This data was fetched after mounting.';
+      this.setState({ data: fetchedData });
+    }, 2000); // Simulate a 2-second delay
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>componentDidMount Example</h1>
+        {this.state.data ? (
+          <p>Data: {this.state.data}</p>
+        ) : (
+          <p>Loading data...</p>
+        )}
+      </div>
+    );
+  }
+}
+
+export default MyComponent;
+````
+
 # React Router
 
 Separate open source project. Not part of React. To use it can wrap `App` component in `BrowserRouter`:
@@ -963,12 +1055,40 @@ So if API call has no results, can simply return it in an early return from `Pro
   if (products?.length === 0) return <PageNotFound />;
 ````
 
-# State Management Guidelines
+# Running example projects
+
+Some projects written with an older React version like 16 require an older NodeJS version like 10.
+
+### Get older Nodejs Version, install and start app
+
+Install `nvm` and then exec `nvm install 10` and `nvm use 10`.
+
+Then run the following commands:
+
+```
+node -v
+npm install
+npm start
+```
+
+### Fix SSL-error for http://localhost:3000
+
+In chrome type: `chrome://net-internals/#hsts`
+
+Click on `Domain Security Policy` on the Sidebar.
+
+Under "Delete domain security policies" enter domain `localhost` and hit "Delete".
+
+Now can open http://localhost:3000 in a new tab to test app.:-)
+
+# Managing Form State and Validation
+
+## State Management Guidelines
 
 * Keep state local in component
 * But if multiple components need the same state, then lift state to common parent component
   * provide child components with wrapper function around state setter
-* Always use the function form to increment state 
+* Always use the function form to increment state
   ```jsx 
    setCount((count) => count + 1);
   ```
@@ -1001,7 +1121,7 @@ function addToCart(id) {
 }
 ````
 
-# Web Storage
+## Web Storage
 
 Only for:
 * limited data
@@ -1028,34 +1148,6 @@ export default function App() {
   // Everytime the cart dep changes, then store it in localStorage
   useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
 ````
-
-# Running example projects
-
-Some projects written with an older React version like 16 require an older NodeJS version like 10.
-
-### Get older Nodejs Version, install and start app
-
-Install `nvm` and then exec `nvm install 10` and `nvm use 10`.
-
-Then run the following commands:
-
-```
-node -v
-npm install
-npm start
-```
-
-### Fix SSL-error for http://localhost:3000
-
-In chrome type: `chrome://net-internals/#hsts`
-
-Click on `Domain Security Policy` on the Sidebar.
-
-Under "Delete domain security policies" enter domain `localhost` and hit "Delete".
-
-Now can open http://localhost:3000 in a new tab to test app.:-)
-
-# Managing Form State and Validation
 
 Manage form status with a pseudo-enum STATUS and a single state variable status. SUBMITTED comes after user hits "submit".
 Then validation will show errors below the inputs. 
@@ -1132,52 +1224,5 @@ Show error in returned markup:
 </p>
 ````
 
-# class components
+## Managing complex state with useReducer (REDUX)
 
-Though functional components are recommended since React 16, class components still work!
-
-Similar to Angular the class component has lifecycle hooks:
-
-* componentDidMount (on init)
-* componentDidUpdate (on change)
-* componentWillUnmount (on destroy)
-* shouldComponentUpdate
-
-Simple example:
-
-````jsx
-class MyComponent extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      data: null,
-    };
-  }
-
-  componentDidMount() {
-    // This is where you can perform initial setup.
-
-    // In this example, we simulate fetching data from an API after the             component has mounted.
-    // We use a setTimeout to mimic an asynchronous operation.
-    setTimeout(() => {
-      const fetchedData = 'This data was fetched after mounting.';
-      this.setState({ data: fetchedData });
-    }, 2000); // Simulate a 2-second delay
-  }
-
-  render() {
-    return (
-      <div>
-        <h1>componentDidMount Example</h1>
-        {this.state.data ? (
-          <p>Data: {this.state.data}</p>
-        ) : (
-          <p>Loading data...</p>
-        )}
-      </div>
-    );
-  }
-}
-
-export default MyComponent;
-````
