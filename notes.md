@@ -186,7 +186,12 @@ const incBtnRef = useRef(null);
 return (
         <> {/* empty container */}
          ...
-          <button className="btn" ref={incBtnRef} onClick={increment}>
+          <button className="btn" 
+                  ref={incBtnRef} 
+                  onClick={() => {
+                      const val = incBtnRef.current.value; // current is html element
+                      
+                  }}>
             Increment
           </button>
         </>
@@ -254,30 +259,35 @@ import { useState, useEffect } from "react";
 const baseUrl = process.env.REACT_APP_API_BASE_URL; // env variable for base path
 
 export default function useFetch(url) { // Can be called to make REST calls with different urls
+  const isMounted = useRef(false); // too check if component is still mounted (not destroyed)
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    isMounted.current = true; // init isMounted when starting useEffect
       
     async function init() { // must declare async functions inside useEffecte
       try {
         const response = await fetch(baseUrl + url);
         if (response.ok) {
           const json = await response.json();
-          setData(json);
+          if (isMounted.current) setData(json); // check if component mounted, then setData
         } else {
           throw response;
         }
       } catch (e) {
-        setError(e);
+        if (isMounted.current) setError(e); // check if component mounted, then setError
       } finally {
-        setLoading(false);
+        if (isMounted.current) setLoading(false); // check if component mounted, then setLoading
       }
     }
     
     init();
-    
+
+    return () => { // cleanup function, that will set isMounted to false
+      isMounted.current = false;
+    };
   }, [url]); // will be run once for every different url
 
   return { data, error, loading };
@@ -1122,6 +1132,52 @@ Show error in returned markup:
 </p>
 ````
 
+# class components
 
+Though functional components are recommended since React 16, class components still work!
 
+Similar to Angular the class component has lifecycle hooks:
 
+* componentDidMount (on init)
+* componentDidUpdate (on change)
+* componentWillUnmount (on destroy)
+* shouldComponentUpdate
+
+Simple example:
+
+````jsx
+class MyComponent extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      data: null,
+    };
+  }
+
+  componentDidMount() {
+    // This is where you can perform initial setup.
+
+    // In this example, we simulate fetching data from an API after the             component has mounted.
+    // We use a setTimeout to mimic an asynchronous operation.
+    setTimeout(() => {
+      const fetchedData = 'This data was fetched after mounting.';
+      this.setState({ data: fetchedData });
+    }, 2000); // Simulate a 2-second delay
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>componentDidMount Example</h1>
+        {this.state.data ? (
+          <p>Data: {this.state.data}</p>
+        ) : (
+          <p>Loading data...</p>
+        )}
+      </div>
+    );
+  }
+}
+
+export default MyComponent;
+````
