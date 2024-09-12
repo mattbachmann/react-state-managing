@@ -1121,7 +1121,7 @@ function addToCart(id) {
 }
 ````
 
-## Web Storage
+## Web storage
 
 Only for:
 * limited data
@@ -1148,6 +1148,8 @@ export default function App() {
   // Everytime the cart dep changes, then store it in localStorage
   useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
 ````
+
+## Form state and validation
 
 Manage form status with a pseudo-enum STATUS and a single state variable status. SUBMITTED comes after user hits "submit".
 Then validation will show errors below the inputs. 
