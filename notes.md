@@ -37,7 +37,9 @@
     * [Fix SSL-error for http://localhost:3000](#fix-ssl-error-for-httplocalhost3000)
 * [Managing Form State and Validation](#managing-form-state-and-validation)
   * [State Management Guidelines](#state-management-guidelines)
-  * [Web Storage](#web-storage)
+  * [Web storage](#web-storage)
+  * [Form state and validation](#form-state-and-validation)
+  * [Managing complex state with useReducer (REDUX)](#managing-complex-state-with-usereducer-redux)
 <!-- TOC -->
 
 # Introduction to React
