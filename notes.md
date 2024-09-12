@@ -39,7 +39,8 @@
   * [State Management Guidelines](#state-management-guidelines)
   * [Web storage](#web-storage)
   * [Form state and validation](#form-state-and-validation)
-  * [Managing complex state with useReducer (REDUX)](#managing-complex-state-with-usereducer-redux)
+  * [Managing complex state with useReducer](#managing-complex-state-with-usereducer)
+  * [useContext for sharing state](#usecontext-for-sharing-state)
 <!-- TOC -->
 
 # Introduction to React
@@ -1228,7 +1229,7 @@ Show error in returned markup:
 </p>
 ````
 
-## Managing complex state with useReducer (REDUX)
+## Managing complex state with useReducer
 
 Instead of `useState` can also use `useReducer` to manage state with Redux.
 
@@ -1323,3 +1324,8 @@ export default function cartReducer(cart, action) {
 ````
 
 The returned value will replace the entire `cart` array so need to merge entries when required.
+
+## useContext for sharing state
+
+React Context is for large apps where lifting state (props drilling) is not advisable. 
+
