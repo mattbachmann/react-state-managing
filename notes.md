@@ -1226,3 +1226,96 @@ Show error in returned markup:
 
 ## Managing complex state with useReducer (REDUX)
 
+Instead of `useState` can also use `useReducer` to manage state with Redux.
+
+````jsx
+let initialCart;
+try {
+  initialCart = JSON.parse(localStorage.getItem("cart")) ?? [];
+} catch {
+  console.error("The cart could not be parsed into JSON.");
+  initialCart = [];
+}
+
+export default function App() {
+  const [cart, dispatch] = useReducer(cartReducer, initialCart); // cart state and dispatch returned
+
+  useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
+
+  return (
+          <>
+            <div className="content">
+              <Header />
+              <main>
+                <Routes>
+                  <Route path="/" element={<h1>Welcome to Carved Rock Fitness</h1>} />
+                  <Route path="/:category" element={<Products />} />
+                  <Route
+                          path="/:category/:id"
+                          element={<Detail dispatch={dispatch} />} // only need to pass dispatch
+                  />
+                  <Route
+                          path="/cart"
+                          element={<Cart cart={cart} dispatch={dispatch} />}
+                  />
+                  <Route
+                          path="/checkout"
+                          element={<Checkout cart={cart} dispatch={dispatch} />}
+                  />
+                </Routes>
+              </main>
+            </div>
+            <Footer />
+          </>
+  );
+}
+````
+
+Then can dispatch `action` object with an `action.type` of string plus additional payload if required. 
+
+````jsx
+<select
+              aria-label={`Select quantity for ${name} size ${size}`}
+              onChange={(e) =>
+                dispatch({
+                  type: "updateQuantity",
+                  sku,
+                  quantity: parseInt(e.target.value),
+                })
+              }
+              value={quantity}
+            >
+````
+
+The `cartReducer` function can be put into its own file:
+
+````jsx
+export default function cartReducer(cart, action) {
+  switch (action.type) {
+    case "empty":
+      return [];
+    case "updateQuantity": {
+      const { quantity, sku } = action;
+      return quantity === 0
+        ? cart.filter((i) => i.sku !== sku)
+        : cart.map((i) => (i.sku === sku ? { ...i, quantity } : i));
+    }
+    case "add":
+      const { id, sku } = action;
+      const itemInCart = cart.find((i) => i.sku === sku);
+      if (itemInCart) {
+        // Return new array with the matching item replaced
+        return cart.map((i) =>
+          i.sku === sku ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      } else {
+        // Return new array with the new item appended
+        return [...cart, { id, sku, quantity: 1 }];
+      }
+    default:
+      throw new Error("Unhandled action " + action.type);
+  }
+}
+````
+
+The returned value will replace the entire `cart` array so need to merge entries when required.
