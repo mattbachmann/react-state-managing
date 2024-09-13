@@ -1325,7 +1325,100 @@ export default function cartReducer(cart, action) {
 
 The returned value will replace the entire `cart` array so need to merge entries when required.
 
-## useContext for sharing state
+## React Context for sharing state
 
 React Context is for large apps where lifting state (props drilling) is not advisable. 
 
+1) Context is declared with `const MyContext = React.createContext(null);`.
+
+2) Then it is provided by wrapping child components inside `<MyContext.Provider value={{payload}}></MyContext.Provider>`.
+
+3) Child components can then call `const {payload} = useContext(MyContext);` to consume the context and extract its payload.
+
+An example where the shopping cart and dispatch function are shared with CartContext in `cartContext.js`:
+
+````jsx
+import React, {useContext, useEffect, useReducer} from "react";
+import cartReducer from "./cartReducer";
+
+// React Context declaration (not exported)
+const CartContext = React.createContext(null);
+
+
+let initialCart;
+try {
+  initialCart = JSON.parse(localStorage.getItem("cart")) ?? [];
+} catch {
+  console.error("The cart could not be parsed into JSON.");
+  initialCart = [];
+}
+/**
+ * CartProvider wrapper component to wrap App component in index.js
+ * Also encapsulates the shared state/reducer
+ * @param props
+ * @returns {JSX.Element}
+ * @constructor
+ */
+export function CartProvider(props) {
+  const [cart, dispatch] = useReducer(cartReducer, initialCart); // shared state/reducer
+  useEffect(() => localStorage.setItem("cart", JSON.stringify(cart)), [cart]);
+
+  return (
+    <CartContext.Provider value={{cart, dispatch}}> {/*Context.Provider value contains object with shared props*/}
+      {props.children} {/*children to which context is provided*/}
+    </CartContext.Provider>
+  );
+}
+
+/**
+ * custom hook useCart
+ * @returns {*} shared context object containing {cart, dispatch}
+ */
+export function useCart() {
+  const context = useContext(CartContext); // useContext hook
+  if (!context) {
+    throw new Error(
+      "useCart must be used within a CartProvider. Wrap a parent component in <CartProvider> to fix this error."
+    );
+  }
+  return context;
+}
+````
+
+The CartProvider component wraps the App component in `index.js`:
+````jsx
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+import ErrorBoundary from "./ErrorBoundary";
+import { BrowserRouter } from "react-router-dom";
+import { CartProvider } from "./cartContext";
+
+ReactDOM.render(
+  <ErrorBoundary>
+    <BrowserRouter>
+      <CartProvider> {/* provider */}
+        <App />
+      </CartProvider>
+    </BrowserRouter>
+  </ErrorBoundary>,
+  document.getElementById("root")
+);
+
+````
+
+Finally `useCart` can be called in `Cart.jsx`:
+````jsx
+import React from "react";
+import useFetchAll from "./services/useFetchAll";
+import Spinner from "./Spinner";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "./cartContext";
+
+export default function Cart() {
+  const { cart, dispatch } = useCart(); // call useCart
+  const navigate = useNavigate();
+  const urls = cart.map((i) => `products/${i.id}`); // access cart
+  const { data: products, loading, error } = useFetchAll(urls);
+
+````
