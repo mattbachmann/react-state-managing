@@ -40,7 +40,8 @@
   * [Web storage](#web-storage)
   * [Form state and validation](#form-state-and-validation)
   * [Managing complex state with useReducer](#managing-complex-state-with-usereducer)
-  * [useContext for sharing state](#usecontext-for-sharing-state)
+  * [React Context for sharing state](#react-context-for-sharing-state)
+  * [3rd Party Libraries for State management](#3rd-party-libraries-for-state-management)
 <!-- TOC -->
 
 # Introduction to React
@@ -1422,3 +1423,9 @@ export default function Cart() {
   const { data: products, loading, error } = useFetchAll(urls);
 
 ````
+
+## 3rd Party Libraries for State management
+
+* `Redux`, `Xstate` for more complex state transition logic
+* `react-query` has support for caching and syncing frontend and backend
+* `React Hook Form`, `Formik` for forms
